@@ -10,14 +10,15 @@
 
     <div class="tasks-wrapper">
       <p class="task-box" v-for="item in filterTaskPage()" :key="item.id">
-    <span class="task-item">
+
       <input type="checkbox"
              :id="`check-${item.id}`"
              :name="`check-${item.id}`"
+             v-model="item.checked"
       />
-      <label @click=" item.checked = !item.checked " :for="`check-${item.id}`" :class="{ through: item.checked }">
+      <label :for="`check-${item.id}`" :class="{ through: item.checked }">
         {{ item.text }} </label>
-    </span>
+
         <button class="btn" @click="deleteTask(item)">Удалить</button>
       </p>
     </div>
@@ -115,6 +116,7 @@ h1 {
   border-radius: 4px;
   border: none;
   font-size: 16px;
+  margin-right: 10px;
 }
 .notice {
   position: absolute;
@@ -131,6 +133,7 @@ h1 {
   border-radius: 4px;
   border: none;
   cursor: pointer;
+  margin-left: auto;
 }
 
 .btn:hover {
@@ -144,7 +147,7 @@ h1 {
 
 .task-box {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -161,5 +164,14 @@ h1 {
 
 .main {
   flex: 1 1 auto;
+  max-width: 500px;
+}
+
+.task-box input {
+  margin-right: 10px;
+}
+.task-box label {
+  margin-right: 10px;
+  word-break: break-all;
 }
 </style>
