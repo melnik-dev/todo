@@ -2,26 +2,29 @@
   <div class="container wrapper">
     <h1>Список задач</h1>
     <div class="main">
-    <div class="task">
-      <input type="text" v-model="task" placeholder="новая задача...">
-      <button class="btn" @click="addTask">Добавить</button>
-      <span v-if="isNotice" class="notice">{{ notice }}</span>
-    </div>
+      <div class="task">
+        <input type="text" v-model="task" @keydown.enter="addTask" placeholder="новая задача...">
+        <button class="btn" @click="addTask">Добавить</button>
+        <span v-if="isNotice" class="notice">{{ notice }}</span>
+      </div>
+      <div class="tasks-wrapper">
 
-    <div class="tasks-wrapper">
-      <p class="task-box" v-for="item in filterTaskPage()" :key="item.id">
+        <p class="task-box"
+           v-for="(item, i) in filterTaskPage()"
+           :key="i">
+<span  @click.prevent="taskCheck(item)">
 
       <input type="checkbox"
              :id="`check-${item.id}`"
              :name="`check-${item.id}`"
              v-model="item.checked"
       />
-      <label :for="`check-${item.id}`" :class="{ through: item.checked }">
-        {{ item.text }} </label>
+       <label :for="`check-${item.id}`" :class="{ through: item.checked }"> {{ item.text }} </label>
+          </span>
+          <button class="btn" @click="deleteTask(item)">Удалить</button>
+        </p>
 
-        <button class="btn" @click="deleteTask(item)">Удалить</button>
-      </p>
-    </div>
+      </div>
     </div>
     <div>
       <button
@@ -66,9 +69,11 @@ export default {
       this.pageCount = Math.ceil(this.tasks.length / 8);
       this.task = "";
       this.isNotice = false;
+      this.setLocalStorage();
     },
     deleteTask(item) {
       this.tasks = this.tasks.filter(t => t.id !== item.id);
+      this.setLocalStorage();
       this.pageCount = Math.ceil(this.tasks.length / 8);
       if (!this.tasks.length) {
         this.notice = "Добавте задачу...";
@@ -79,6 +84,25 @@ export default {
       const start = (this.page - 1) * 8;
       const end = this.page * 8;
       return this.tasks.slice(start, end);
+    },
+    setLocalStorage() {
+      const tasksJSON = JSON.stringify(this.tasks);
+      localStorage.setItem("to-do", tasksJSON);
+    },
+    taskCheck(item) {
+      this.tasks = this.tasks.map(t => {
+        if (t.id === item.id) {
+          t.checked = !t.checked;
+        }
+        return t;
+      });
+      this.setLocalStorage();
+    }
+  },
+  created() {
+    if (localStorage.getItem("to-do") && localStorage.getItem("to-do") !== null) {
+      this.tasks = JSON.parse(localStorage.getItem("to-do"));
+      this.isNotice = false
     }
   }
 }
@@ -106,7 +130,8 @@ h1 {
 
 .task {
   display: flex;
-  position: relative;margin-bottom: 32px;
+  position: relative;
+  margin-bottom: 32px;
 }
 
 .task input {
@@ -118,6 +143,7 @@ h1 {
   font-size: 16px;
   margin-right: 10px;
 }
+
 .notice {
   position: absolute;
   left: 10px;
@@ -169,9 +195,17 @@ h1 {
 
 .task-box input {
   margin-right: 10px;
+  cursor: pointer;
+}
+.task-box {
+  padding: 3px;
+  border: 1px dotted black;
+  border-radius: 4px;
+  cursor: grab;
 }
 .task-box label {
   margin-right: 10px;
   word-break: break-all;
+  cursor: pointer;
 }
 </style>
