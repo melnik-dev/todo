@@ -100,7 +100,7 @@ export default {
     }
   },
   created() {
-    if (localStorage.getItem("to-do") && localStorage.getItem("to-do") !== null) {
+    if (localStorage.getItem("to-do")) {
       this.tasks = JSON.parse(localStorage.getItem("to-do"));
       this.isNotice = false
     }
