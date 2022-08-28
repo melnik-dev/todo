@@ -8,11 +8,17 @@
         <span v-if="isNotice" class="notice">{{ notice }}</span>
       </div>
       <div class="tasks-wrapper">
+        <div class="task_drop-zone"
+             v-for="(item, i) in filterTaskPage()"
+             :key="i"
+             @dragenter="dragEnter"
+             @dragleave="dragLeave">
+          <p class="task-box"
 
-        <p class="task-box"
-           v-for="(item, i) in filterTaskPage()"
-           :key="i">
-<span  @click.prevent="taskCheck(item)">
+             draggable="true"
+             @dragstart="dragStart"
+             @dragend="dragEnd">
+<span @click.prevent="taskCheck(item)">
 
       <input type="checkbox"
              :id="`check-${item.id}`"
@@ -21,9 +27,9 @@
       />
        <label :for="`check-${item.id}`" :class="{ through: item.checked }"> {{ item.text }} </label>
           </span>
-          <button class="btn" @click="deleteTask(item)">Удалить</button>
-        </p>
-
+            <button class="btn" @click="deleteTask(item)">Удалить</button>
+          </p>
+        </div>
       </div>
     </div>
     <div>
@@ -97,6 +103,19 @@ export default {
         return t;
       });
       this.setLocalStorage();
+    },
+
+    dragStart() {
+      console.log("drag Start")
+    },
+    dragEnd() {
+      console.log("drag End")
+    },
+    dragEnter() {
+      console.log("drag Enter")
+    },
+    dragLeave() {
+      console.log("drag Leave")
     }
   },
   created() {
@@ -197,12 +216,14 @@ h1 {
   margin-right: 10px;
   cursor: pointer;
 }
+
 .task-box {
   padding: 3px;
   border: 1px dotted black;
   border-radius: 4px;
-  cursor: grab;
+  cursor: all-scroll;
 }
+
 .task-box label {
   margin-right: 10px;
   word-break: break-all;
