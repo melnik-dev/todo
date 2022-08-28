@@ -116,6 +116,9 @@ export default {
     },
     dragLeave() {
       console.log("drag Leave")
+    },
+    dragOver() {
+      console.log("drag Over")
     }
   },
   created() {
