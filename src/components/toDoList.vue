@@ -7,29 +7,33 @@
         <button class="btn" @click="addTask">Добавить</button>
         <span v-if="isNotice" class="notice">{{ notice }}</span>
       </div>
-      <div class="tasks-wrapper">
-        <div class="task_drop-zone"
-             v-for="(item, i) in filterTaskPage()"
-             :key="i"
-             @dragenter="dragEnter"
-             @dragleave="dragLeave">
-          <p class="task-box"
+      <div class="tasks-wrapper"
+           @dragenter="dragEnter"
 
-             draggable="true"
-             @dragstart="dragStart"
-             @dragend="dragEnd">
-<span @click.prevent="taskCheck(item)">
+           @dragover="dragOver"
+           @drop="dragDrop">
 
-      <input type="checkbox"
-             :id="`check-${item.id}`"
-             :name="`check-${item.id}`"
-             v-model="item.checked"
-      />
+        <p class="task-box"
+           v-for="(item, i) in filterTaskPage()"
+           :key="item.id"
+           :id="`item-${i}`"
+           draggable="true"
+           @dragstart="dragStart"
+           @dragend="dragEnd"
+           @dragleave="dragLeave(i)"
+           @click="writeIdDragElem(i)">
+
+        <span @click.prevent="taskCheck(item)">
+
+        <input type="checkbox"
+               :id="`check-${item.id}`"
+               :name="`check-${item.id}`"
+               v-model="item.checked"
+        />
        <label :for="`check-${item.id}`" :class="{ through: item.checked }"> {{ item.text }} </label>
           </span>
-            <button class="btn" @click="deleteTask(item)">Удалить</button>
-          </p>
-        </div>
+          <button class="btn" @click="deleteTask(item)">Удалить</button>
+        </p>
       </div>
     </div>
     <div>
@@ -55,7 +59,11 @@ export default {
       isNotice: true,
 
       page: 1,
-      pageCount: 1
+      pageCount: 1,
+
+      idDragElem: undefined,
+      insertAfterElem: undefined,
+      draggableElement: undefined
     }
   },
   methods: {
@@ -72,7 +80,7 @@ export default {
         checked: false
       };
       this.tasks.unshift(newTask);
-      this.pageCount = Math.ceil(this.tasks.length / 8);
+      this.pageCount = Math.ceil(this.tasks.length / 6);
       this.task = "";
       this.isNotice = false;
       this.setLocalStorage();
@@ -87,8 +95,8 @@ export default {
       }
     },
     filterTaskPage() {
-      const start = (this.page - 1) * 8;
-      const end = this.page * 8;
+      const start = (this.page - 1) * 6;
+      const end = this.page * 6;
       return this.tasks.slice(start, end);
     },
     setLocalStorage() {
@@ -105,27 +113,64 @@ export default {
       this.setLocalStorage();
     },
 
-    dragStart() {
-      console.log("drag Start")
+    dragStart(event) {
+      //пользователь начал перетаскивать элемент
+      event.dataTransfer.setData('text/plain', event.target.id);
+      // event.currentTarget.style.backgroundColor = 'yellow';
+      console.log("dragStart");
+      event.target.classList.add("dragging");
     },
     dragEnd() {
+      //завершается перетаскивание
       console.log("drag End")
     },
-    dragEnter() {
-      console.log("drag Enter")
+    dragEnter(event) {
+      //перетаскиваемый элемент попадает в допустимую цель сброса
+      console.log("drag Enter:- ");
+      console.log(event.target.id);
     },
-    dragLeave() {
-      console.log("drag Leave")
+    dragLeave(i) {
+      //перетаскиваемый элемент покидает допустимую цель сброса
+
+      this.insertAfterElem = i;
+      console.log("drag Leave " + i);
     },
-    dragOver() {
-      console.log("drag Over")
+    dragOver(event) {
+      //элемент перетаскивается над допустимой целью сброса каждые несколько сотен миллисекунд
+      event.preventDefault()
+      console.log("drag Over");
+
+    },
+    dragDrop() {
+      //элемент сброшен в допустимую зону сброса
+      // const id = event.dataTransfer.getData('text');
+      this.draggableElement = this.tasks.splice(this.idDragElem, 1);
+      //
+      // const dropzone = event.target;
+      // dropzone.append(draggableElement);
+
+      this.tasks.splice(this.insertAfterElem, 0, [...this.draggableElement]);
+      console.log("drag Drop ");
+      console.log(this.draggableElement);
+      console.log(this.tasks);
+      this.setLocalStorage()
+    },
+    writeIdDragElem(i) {
+      this.idDragElem = i;
+      console.log(i)
     }
   },
+  // watch: {
+  //   tasks() {
+  //     localStorage.setItem("to-do", JSON.stringify(this.tasks));
+  //   }
+  // },
   created() {
     if (localStorage.getItem("to-do")) {
       this.tasks = JSON.parse(localStorage.getItem("to-do"));
       this.isNotice = false
     }
+    this.pageCount = Math.ceil(this.tasks.length / 6);
   }
 }
 </script>
@@ -136,6 +181,10 @@ export default {
   color: #d1d5db;
 }
 
+.dragging {
+  background: aquamarine;
+}
+
 .container {
   margin: 0 auto;
   max-width: 500px;
@@ -143,11 +192,12 @@ export default {
   margin-top: 50px;
   background: #374151;
   border-radius: 4px;
-  height: 560px;
+  height: 600px;
 }
 
 h1 {
   text-align: center;
+  margin-top: 0px;
 }
 
 .task {
@@ -175,7 +225,6 @@ h1 {
 
 .btn {
   min-width: 80px;
-  margin-left: 4px;
   padding: 10px;
   background: #1f2937;
   border-radius: 4px;
@@ -197,6 +246,7 @@ h1 {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  margin-bottom: 30px;
 }
 
 .through {
