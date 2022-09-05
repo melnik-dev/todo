@@ -8,8 +8,9 @@
         <span v-if="isNotice" class="notice">{{ notice }}</span>
       </div>
       <div class="tasks-wrapper"
+           ref="dragzone"
            @dragenter="dragEnter"
-
+           @dragleave="dragLeaveZone"
            @dragover="dragOver"
            @drop="dragDrop">
 
@@ -18,10 +19,9 @@
            :key="item.id"
            :id="`item-${i}`"
            draggable="true"
-           @dragstart="dragStart"
-           @dragend="dragEnd"
+           @dragstart="dragStart(i, $event)"
            @dragleave="dragLeave(i)"
-           @click="writeIdDragElem(i)">
+           @dragend="dragEnd">
 
         <span @click.prevent="taskCheck(item)">
 
@@ -113,51 +113,49 @@ export default {
       this.setLocalStorage();
     },
 
-    dragStart(event) {
+    dragStart(i, event) {
       //пользователь начал перетаскивать элемент
-      event.dataTransfer.setData('text/plain', event.target.id);
+      // event.dataTransfer.setData('text/plain', event.target.id);
       // event.currentTarget.style.backgroundColor = 'yellow';
-      console.log("dragStart");
+      this.idDragElem = i;
       event.target.classList.add("dragging");
+      console.log("dragStart " + "idDragElem: " + this.idDragElem);
     },
-    dragEnd() {
+    dragEnd(event) {
       //завершается перетаскивание
+      event.target.classList.remove("dragging");
       console.log("drag End")
     },
     dragEnter(event) {
       //перетаскиваемый элемент попадает в допустимую цель сброса
-      console.log("drag Enter:- ");
-      console.log(event.target.id);
+      this.$refs.dragzone.style.background = "#475569";
+      console.log("drag Enter " + "target.id " + event.target.id);
     },
     dragLeave(i) {
       //перетаскиваемый элемент покидает допустимую цель сброса
-
       this.insertAfterElem = i;
-      console.log("drag Leave " + i);
+      console.log("drag Leave " + "AfterElem " + i);
+    },
+    dragLeaveZone() {
+      console.log("drag Leave Zone " );
     },
     dragOver(event) {
       //элемент перетаскивается над допустимой целью сброса каждые несколько сотен миллисекунд
       event.preventDefault()
-      console.log("drag Over");
-
+      console.log("drag Over ");
     },
     dragDrop() {
       //элемент сброшен в допустимую зону сброса
       // const id = event.dataTransfer.getData('text');
-      this.draggableElement = this.tasks.splice(this.idDragElem, 1);
-      //
       // const dropzone = event.target;
       // dropzone.append(draggableElement);
+      this.draggableElement = this.tasks.splice(this.idDragElem, 1);
 
-      this.tasks.splice(this.insertAfterElem, 0, [...this.draggableElement]);
+      this.tasks.splice(this.insertAfterElem, 0, this.draggableElement[0]);
+      this.$refs.dragzone.style.background = "none";
       console.log("drag Drop ");
       console.log(this.draggableElement);
-      console.log(this.tasks);
       this.setLocalStorage()
-    },
-    writeIdDragElem(i) {
-      this.idDragElem = i;
-      console.log(i)
     }
   },
   // watch: {
@@ -182,7 +180,10 @@ export default {
 }
 
 .dragging {
-  background: aquamarine;
+  background: #334155!important;
+}
+.dragzone{
+  background: #475569;
 }
 
 .container {
@@ -247,6 +248,7 @@ h1 {
   justify-content: flex-start;
   align-items: center;
   margin-bottom: 30px;
+  background: #374151;
 }
 
 .through {
