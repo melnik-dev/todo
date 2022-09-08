@@ -5,6 +5,9 @@
       <div class="task">
         <input type="text" v-model="task" @keydown.enter="addTask" placeholder="новая задача...">
         <button class="btn" @click="addTask">Добавить</button>
+        <button class="btn" @click="getData">Write</button>
+        <button class="btn" @click="getTwoData">Get</button>
+        <button class="btn" @click="removeData">Update</button>
         <span v-if="isNotice" class="notice">{{ notice }}</span>
       </div>
       <div class="tasks-wrapper"
@@ -49,6 +52,8 @@
 </template>
 
 <script>
+import {writeListData, getListData, removeListData} from "@/firebase";
+
 export default {
   name: "toDoList",
   data() {
@@ -63,7 +68,14 @@ export default {
 
       idDragElem: undefined,
       insertAfterElem: undefined,
-      draggableElement: undefined
+      draggableElement: undefined,
+
+
+      todos: [
+        {id: 22, text: "Texttttt", checked: false},
+        {id: 33, text: "Texttt33", checked: false},
+        {id: 44, text: "Texttt44", checked: true}
+      ]
     }
   },
   methods: {
@@ -83,11 +95,14 @@ export default {
       this.pageCount = Math.ceil(this.tasks.length / 6);
       this.task = "";
       this.isNotice = false;
-      this.setLocalStorage();
+      // this.setLocalStorage();
+      writeListData(this.tasks);
     },
     deleteTask(item) {
       this.tasks = this.tasks.filter(t => t.id !== item.id);
-      this.setLocalStorage();
+      // this.setLocalStorage();
+      removeListData();
+      writeListData(this.tasks);
       this.pageCount = Math.ceil(this.tasks.length / 8);
       if (!this.tasks.length) {
         this.notice = "Добавте задачу...";
@@ -99,10 +114,6 @@ export default {
       const end = this.page * 6;
       return this.tasks.slice(start, end);
     },
-    setLocalStorage() {
-      const tasksJSON = JSON.stringify(this.tasks);
-      localStorage.setItem("to-do", tasksJSON);
-    },
     taskCheck(item) {
       this.tasks = this.tasks.map(t => {
         if (t.id === item.id) {
@@ -110,7 +121,13 @@ export default {
         }
         return t;
       });
-      this.setLocalStorage();
+      // this.setLocalStorage();
+      removeListData();
+      writeListData(this.tasks);
+    },
+    setLocalStorage() {
+      const tasksJSON = JSON.stringify(this.tasks);
+      localStorage.setItem("to-do", tasksJSON);
     },
 
     dragStart(i, event) {
@@ -137,7 +154,7 @@ export default {
       console.log("drag Leave " + "AfterElem " + i);
     },
     dragLeaveZone() {
-      console.log("drag Leave Zone " );
+      console.log("drag Leave Zone ");
     },
     dragOver(event) {
       //элемент перетаскивается над допустимой целью сброса каждые несколько сотен миллисекунд
@@ -156,6 +173,40 @@ export default {
       console.log("drag Drop ");
       console.log(this.draggableElement);
       this.setLocalStorage()
+    },
+
+    async getData() {
+      // let url ='https://todos-5499c-default-rtdb.europe-west1.firebasedatabase.app/todolist.json';
+
+      // fetch(url)
+      //     .then((response) => {
+      //       return response.json();
+      //     })
+      //     .then((data) => {
+      //       console.log(data);
+      //     });
+
+      // try {
+      //   const response = await fetch(url, {
+      //     method: 'POST', // или 'PUT'
+      //     body: JSON.stringify(this.todos), // данные могут быть 'строкой' или {объектом}!
+      //     headers: {
+      //       'Content-Type': 'application/json'
+      //     }
+      //   });
+      //   const json = await response.json();
+      //   console.log('Успех:', JSON.stringify(json));
+      // } catch (error) {
+      //   console.error('Ошибка:', error);
+      // }
+
+      writeListData(this.todos);
+    },
+    getTwoData() {
+      getListData();
+    },
+    removeData() {
+      removeListData(this.todos);
     }
   },
   // watch: {
@@ -164,10 +215,11 @@ export default {
   //   }
   // },
   created() {
-    if (localStorage.getItem("to-do")) {
-      this.tasks = JSON.parse(localStorage.getItem("to-do"));
-      this.isNotice = false
-    }
+    // if () {
+    //   //this.tasks = JSON.parse(localStorage.getItem("to-do"));
+    //   this.isNotice = false
+    // }
+    getListData(this.tasks);
     this.pageCount = Math.ceil(this.tasks.length / 6);
   }
 }
@@ -180,9 +232,10 @@ export default {
 }
 
 .dragging {
-  background: #334155!important;
+  background: #334155 !important;
 }
-.dragzone{
+
+.dragzone {
   background: #475569;
 }
 
