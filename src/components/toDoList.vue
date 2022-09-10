@@ -92,8 +92,7 @@ export default {
     deleteTask(item) {
       this.tasks = this.tasks.filter(t => t.id !== item.id);
       // this.setLocalStorage();
-      removeListData(this.tasks);
-      writeListData(this.tasks);
+      this.updateListData();
       this.pageCount = Math.ceil(this.tasks.length / 8);
       if (!this.tasks.length) {
         this.notice = "Добавте задачу...";
@@ -116,8 +115,7 @@ export default {
         return t;
       });
       // this.setLocalStorage();
-      removeListData();
-      writeListData(this.tasks);
+      this.updateListData();
     },
     setLocalStorage() {
       const tasksJSON = JSON.stringify(this.tasks);
@@ -167,9 +165,14 @@ export default {
       console.log("drag Drop ");
       console.log(this.draggableElement);
       // this.setLocalStorage()
-      removeListData(this.tasks);
-      writeListData(this.tasks);
+      this.updateListData();
     },
+   async updateListData() {
+     await removeListData(this.tasks);
+     await writeListData(this.tasks);
+
+    // this.pageCount = Math.ceil(this.tasks.length / 6);
+    }
   },
   // watch: {
   //   tasks() {
