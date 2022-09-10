@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue, remove } from "firebase/database";
+import { getDatabase, ref, set, onValue, remove, child, get } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -33,16 +33,46 @@ function writeListData(tasks) {
         });
 }
 
-function getListData(tasks) {
+function getListData() {
     const starCountRef = ref(database, 'todolist/');
-    onValue(starCountRef, (snapshot) => {
-        tasks = snapshot.val();
-        console.log(tasks);
+    let data;
+        onValue(starCountRef, (snapshot) => {
+        data = snapshot.val();
+        console.log(data);
     });
+    return data;
 }
+
+// eslint-disable-next-line no-unused-vars
+function getOneListData(data) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `todolist/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            data = snapshot.val();
+            console.log(snapshot.val());
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return data;
+}
+
 
 function removeListData() {
   remove(ref(database, 'todolist/'));
+
+    // update(ref(database, 'todolist/'), tasks)
+    //     .then(() => {
+    //         // Data saved successfully!
+    //         console.log('database send')
+    //     })
+    //     .catch((error) => {
+    //         // The write failed...
+    //         console.log(error)
+    //     });
+
 }
 
-export {writeListData, getListData, removeListData};
+export {writeListData, getListData, removeListData, getOneListData};
