@@ -166,7 +166,9 @@ export default {
       this.$refs.dragzone.style.background = "none";
       console.log("drag Drop ");
       console.log(this.draggableElement);
-      this.setLocalStorage()
+      // this.setLocalStorage()
+      removeListData(this.tasks);
+      writeListData(this.tasks);
     },
   },
   // watch: {
@@ -189,7 +191,7 @@ export default {
 
 const url = 'https://todos-5499c-default-rtdb.europe-west1.firebasedatabase.app/todolist.json';
 
-      fetch(url)
+      await fetch(url)
           .then((response) => {
             return response.json();
           })
