@@ -38,25 +38,45 @@ function getListData() {
     let data;
         onValue(starCountRef, (snapshot) => {
         data = snapshot.val();
+
         console.log(data);
     });
     return data;
+// let todosFB = [];
+//     Object.keys(data).forEach(key => {
+//         const value = data[key]
+//     })
+//     todosFB.push(
+//         new Task(
+//             id,
+//             text,
+//             checked,
+//         )
+//     )
 }
 
-// eslint-disable-next-line no-unused-vars
-function getOneListData(data) {
+function getOneListData(tasks) {
     const dbRef = ref(getDatabase());
     get(child(dbRef, `todolist/`)).then((snapshot) => {
         if (snapshot.exists()) {
-            data = snapshot.val();
-            console.log(snapshot.val());
+            const data = snapshot.val();
+
+            Object.keys(data).forEach(key => {
+                const value = data[key];
+
+                let to = {
+                    id: value.id,
+                    text: value.text,
+                    checked: value.checked
+                }
+                tasks.push(to);
+            })
         } else {
             console.log("No data available");
         }
     }).catch((error) => {
         console.error(error);
     });
-    return data;
 }
 
 

@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import {writeListData, removeListData} from "@/firebase";
+import {writeListData, removeListData, getOneListData} from "@/firebase";
 
 export default {
   name: "toDoList",
@@ -103,9 +103,9 @@ export default {
       const start = (this.page - 1) * 6;
       const end = this.page * 6;
       if (this.tasks) {
-      return this.tasks.slice(start, end);
+        return this.tasks.slice(start, end);
       }
-      return ;
+      return;
     },
     taskCheck(item) {
       this.tasks = this.tasks.map(t => {
@@ -167,11 +167,11 @@ export default {
       // this.setLocalStorage()
       this.updateListData();
     },
-   async updateListData() {
-     await removeListData(this.tasks);
-     await writeListData(this.tasks);
+    async updateListData() {
+      await removeListData(this.tasks);
+      await writeListData(this.tasks);
 
-    // this.pageCount = Math.ceil(this.tasks.length / 6);
+      // this.pageCount = Math.ceil(this.tasks.length / 6);
     }
   },
   // watch: {
@@ -179,32 +179,30 @@ export default {
   //     localStorage.setItem("to-do", JSON.stringify(this.tasks));
   //   }
   // },
-  async created() {
+  created() {
     // if (localStorage.getItem("to-do")) {
     //   //this.tasks = JSON.parse(localStorage.getItem("to-do"));
     //   this.isNotice = false
     // }
 
-    // const firebaseBD = await getListData();
-    // this.tasks = firebaseBD;
+// const url = 'https://todos-5499c-default-rtdb.europe-west1.firebasedatabase.app/todolist.json';
+//
+//       await fetch(url)
+//           .then((response) => {
+//             return response.json();
+//           })
+//           .then((data) => {
+//             if (data) {
+//               this.tasks = data;
+//               this.isNotice = false
+//             }
+//         //    console.log(data);
+//           });
 
-    // const firebaseBD = await getOneListData(this.tasks);
-    // firebaseBD.forEach(element => console.log(element))
-    // console.log(firebaseBD);
-
-const url = 'https://todos-5499c-default-rtdb.europe-west1.firebasedatabase.app/todolist.json';
-
-      await fetch(url)
-          .then((response) => {
-            return response.json();
-          })
-          .then((data) => {
-            if (data) {
-              this.tasks = data;
-              this.isNotice = false
-            }
-            console.log(data);
-          });
+    if (getOneListData(this.tasks)) {
+      getOneListData(this.tasks);
+      this.isNotice = false;
+    }
 
     this.pageCount = Math.ceil(this.tasks.length / 6);
   }
